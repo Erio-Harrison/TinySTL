@@ -264,3 +264,4 @@ void random_shuffle(RandomAccessIterator first, RandomAccessIterator last, Rando
 
 // TODO еепР
 
+
