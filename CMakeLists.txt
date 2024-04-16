@@ -7,4 +7,5 @@ add_executable(TinySTL main.cpp
         DataStructures
         Algorithms
         Test
-        Functors)
+        Functors
+        Allocators)
