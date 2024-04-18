@@ -8,4 +8,5 @@ add_executable(TinySTL main.cpp
         Algorithms
         Test
         Functors
-        Allocators)
+        Allocators
+        Iterators)
