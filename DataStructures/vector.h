@@ -1,7 +1,8 @@
 #include <cstddef>
-
+#include <memory>
+#include "../Allocators/construct.h"
 namespace TinySTL{
-    template <class T, class Alloc>
+    template <class T, class Alloc = std::allocator<T>>
     class vector{
     public:
         typedef T value_type;
@@ -12,7 +13,8 @@ namespace TinySTL{
         typedef ptrdiff_t   difference_type;
 
     protected:
-        // TODO Ω·∫œø’º‰≈‰÷√∆˜ simple_alloc
+        typedef simple_alloc<value_type,Alloc> data_allocator;
+
         iterator start;
         iterator finish;
         iterator end_of_storage;
@@ -57,7 +59,7 @@ namespace TinySTL{
         }
         void pop_back(){
             --finish;
-            /*TODO destroy(finish)*/
+            destroy(finish);
         }
 
         iterator erase(iterator position){
@@ -65,7 +67,7 @@ namespace TinySTL{
                 copy(position+1, finish,position);
             }
             --finish;
-            /*TODO destroy(finish)*/
+            destroy(finish);
             return position;
         }
 
