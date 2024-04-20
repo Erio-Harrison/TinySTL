@@ -5,7 +5,7 @@ namespace TinySTL{
     template <class T, class Alloc = std::allocator<T>>
     class vector{
     public:
-        typedef T value_type;
+        typedef T  value_type;
         typedef value_type* pointer;
         typedef value_type* iterator;
         typedef value_type& reference;
