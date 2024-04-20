@@ -1,5 +1,7 @@
 #include <new>
 #include <cstdlib>
+#include <type_traits>
+
 //构造
 template <class T1, class T2>
 inline void construct(T1* p, T2 value)
@@ -110,3 +112,29 @@ void * __malloc_alloc_template<inst>::oom_realloc(void *p,size_t n)
 //二级配置器
 /*TODO*/
 
+template <class ForwardIterator, class Size, class T>
+inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const T& x)
+{
+    return __uninitialized_fill_n(first,n,x,value_type(first));
+}
+
+template <class ForwardIterator, class Size, class T, class T1>
+inline ForwardIterator __uninitialized_fill_n(ForwardIterator first, Size n, const T&x, T1*)
+{
+    typedef typename std::is_pod<T1>::value is_POD;
+    return __uninitializede_fill_n_aux(first,n,x,is_POD);
+}
+
+template <class ForwardIterator, class Size, class T>
+inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T& x, std::true_type) {
+    return std::fill_n(first, n, x); // PODs can be handled by simply copying
+}
+
+template <class ForwardIterator, class Size, class T>
+ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T& x, __false_type)
+{
+    ForwardIterator current = first;
+    for(; n>0; --n, ++current)
+        construct(&*cur,x);
+    return current;
+}
