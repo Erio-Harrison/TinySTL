@@ -2,7 +2,7 @@
 #include <memory>
 #include "../Allocators/construct.h"
 namespace TinySTL{
-    template <class T, class Alloc = std::allocator<T>>
+    template <class T, class Alloc = alloc>
     class vector{
     public:
         typedef T  value_type;
@@ -77,7 +77,7 @@ namespace TinySTL{
                     T tmp = x;
                     construct(finish, *(finish - 1));
                     ++finish;
-                    std::copy_backward(position, finish - 2, finish - 1);
+                    copy_backward(position, finish - 2, finish - 1);
                     *position = tmp;
                 }
             } else {
@@ -87,10 +87,10 @@ namespace TinySTL{
                 iterator new_start = data_allocator::allocate(new_capacity);
                 iterator new_finish = new_start;
                 try {
-                    new_finish = std::uninitialized_copy(start, position, new_start);
+                    new_finish = uninitialized_copy(start, position, new_start);
                     construct(new_finish, x);
                     ++new_finish;
-                    new_finish = std::uninitialized_copy(position, finish, new_finish);
+                    new_finish = uninitialized_copy(position, finish, new_finish);
                 } catch(...) {
                     destroy(new_start, new_finish);
                     data_allocator::deallocate(new_start, new_capacity);
@@ -115,16 +115,16 @@ namespace TinySTL{
                     const size_type elems_after = finish - position;
                     iterator old_finish = finish;
                     if (elems_after > n) {
-                        std::uninitialized_copy(finish - n, finish, finish);
+                        uninitialized_copy(finish - n, finish, finish);
                         finish += n;
-                        std::copy_backward(position, old_finish - n, old_finish);
-                        std::fill(position, position + n, x_copy);
+                        copy_backward(position, old_finish - n, old_finish);
+                        fill(position, position + n, x_copy);
                     } else {
-                        std::uninitialized_fill_n(finish, n - elems_after, x_copy);
+                        uninitialized_fill_n(finish, n - elems_after, x_copy);
                         finish += n - elems_after;
-                        std::uninitialized_copy(position, old_finish, finish);
+                        uninitialized_copy(position, old_finish, finish);
                         finish += elems_after;
-                        std::fill(position, old_finish, x_copy);
+                        fill(position, old_finish, x_copy);
                     }
                 } else {
                     const size_type old_size = size();
@@ -133,9 +133,9 @@ namespace TinySTL{
                     iterator new_start = data_allocator::allocate(new_capacity);
                     iterator new_finish = new_start;
                     try {
-                        new_finish = std::uninitialized_copy(start, position, new_start);
-                        new_finish = std::uninitialized_fill_n(new_finish, n, x);
-                        new_finish = std::uninitialized_copy(position, finish, new_finish);
+                        new_finish = uninitialized_copy(start, position, new_start);
+                        new_finish = uninitialized_fill_n(new_finish, n, x);
+                        new_finish = uninitialized_copy(position, finish, new_finish);
                     } catch(...) {
                         destroy(new_start, new_finish);
                         data_allocator::deallocate(new_start, new_capacity);

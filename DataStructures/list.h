@@ -64,7 +64,7 @@ namespace TinySTL{
     };
 }
 
-template <class T, class Alloc = std::allocator<T>>
+template <class T, class Alloc = alloc>
 class list{
 protected:
     typedef TinySTL::__list_node<T> list_node;
@@ -212,7 +212,7 @@ public:
         if(first != last)
             transfer(position,first,last);
     }
-
+    //merge的前提是两个lists都已经递增排序
     void merge(list<T, Alloc>& x)
     {
         iterator first1 = begin();
@@ -242,7 +242,7 @@ public:
         }
     }
 
-    //list不能用STL的sort()，因为STL的sort()只接受RamdonAccessIterator
+    //list不能用STL的sort()，因为STL的sort()只接受 RandomAccessIterator
     void sort(){
         if(node -> next == node || link_type(node -> next)->next == node) return;
         list<T,Alloc> carry;
@@ -255,14 +255,14 @@ public:
             while(i < fill && !counter[i].empty())
             {
                 counter[i].merge(carry);
-                carry.std::swap(counter[i++]);
+                carry.swap(counter[i++]);
             }
             carry.swap(counter[i]);
             if(i == fill) ++fill;
         }
         for(int i = 1; i< fill; ++i)
             counter[i].merge(counter[i-1]);
-        std::swap(counter[fill-1]);
+        swap(counter[fill-1]);
     }
 };
 

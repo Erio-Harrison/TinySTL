@@ -40,6 +40,7 @@ public:
     }
 };
 
+
 //“ªº∂≈‰÷√∆˜
 template <int inst>
 class __malloc_alloc_template
@@ -76,6 +77,8 @@ public:
         return (old);
     }
 };
+typedef __malloc_alloc_template<0> malloc_alloc;
+typedef malloc_alloc alloc;
 
 template <int inst>
 void (* __malloc_alloc_template<inst> :: __malloc_alloc_oom_handler)() = nullptr;

@@ -1,76 +1,32 @@
-#include <cstddef>
-#include <stdexcept>  // For std::out_of_range
 
-template <class T>
-class queue {
-public:
-    typedef T value_type;
-    typedef value_type* pointer;
-    typedef size_t size_type;
+#include "../Iterators/iterator.h"
 
-private:
-    pointer array;           // Dynamic array for storing elements
-    size_type array_capacity;  // Capacity of the queue
-    size_type head;           // Index of the front element
-    size_type tail;           // Index where the next element will be inserted
-
-public:
-    queue() : array(nullptr), array_capacity(0), head(0), tail(0) {}
-
-    ~queue() {
-        delete[] array;
+namespace TinySTL{
+    inline size_t __deque_buf_size(size_t n, size_t sz)
+    {
+        return n != 0 ? : (sz < 512 ? size_t(512/sz) : size_t(1));
     }
 
-    bool empty() const {
-        return head == tail;
-    }
+    template <class T, class Ref, class Ptr, size_t BufSiz>
+    struct __deque_iterator{
+        typedef __deque_iterator<T,T&, T*, BufSiz>  iterator;
+        typedef __deque_iterator<T,const T&,const T*,BufSiz> const_iterator;
+        static size_t buffer_size(){return __deque_buf_size(BufSiz,sizeof(T));}
 
-    size_type size() const {
-        return tail - head;
-    }
+        typedef random_access_iterator_tag iterator_category;
+        typedef T value_type;
+        typedef Ptr pointer;
+        typedef Ref reference;
+        typedef size_t size_type;
+        typedef ptrdiff_t difference_type;
+        typedef T** map_pointer;
 
-    void enqueue(const T& value) {
-        if (tail == array_capacity) {
-            // Increase the capacity of the array
-            increase_capacity();
-        }
-        array[tail++] = value;
-    }
+        typedef __deque_iterator self;
 
-    void dequeue() {
-        if (empty()) {
-            throw std::out_of_range("Queue underflow");
-        }
-        ++head;
-    }
+        T* current;
+        T* first;
+        T* last;
+        map_pointer node;
+    };
 
-    T& front() {
-        if (empty()) {
-            throw std::out_of_range("Queue is empty");
-        }
-        return array[head];
-    }
-
-    const T& front() const {
-        if (empty()) {
-            throw std::out_of_range("Queue is empty");
-        }
-        return array[head];
-    }
-
-private:
-    void increase_capacity() {
-        size_type new_capacity = array_capacity == 0 ? 1 : 2 * array_capacity;
-        pointer new_array = new T[new_capacity];
-
-        for (size_type i = head; i < tail; ++i) {
-            new_array[i - head] = array[i];
-        }
-
-        delete[] array;
-        array = new_array;
-        tail -= head;
-        head = 0;
-        array_capacity = new_capacity;
-    }
-};
+}

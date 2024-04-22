@@ -1,71 +1,103 @@
 #include <cstddef>
-#include <algorithm>  // For std::fill
+#include "../Algorithms/algobase.h"
+#include "../Allocators/construct.h"
 
-template <class T, size_t BufSiz = 0>
-class deque {
+inline size_t __deque_buf_size(size_t n, size_t sz)
+{
+    return n != 0 ? n : (sz<512 ? size_t(512/sz) : size_t(1));
+}
+
+template <class T, class Ref, class Ptr, size_t BufSiz>
+struct __deque_iterator
+{
+    typedef __deque_iterator<T,T&,T*,BufSiz> iterator;
+    typedef __deque_iterator<T,const T&, const T*,BufSiz> const_iterator;
+    static size_t buffer_size() {return __deque_buf_size(BufSiz,sizeof(T));}
+
+    typedef random_access_iterator_tag iterator_category;
+    typedef T value_type;
+    typedef Ptr pointer;
+    typedef Ref reference;
+    typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    typedef T** map_pointer;
+
+    typedef __deque_iterator self;
+    T* current;
+    T* first;
+    T* last;
+    map_pointer node;
+
+    void set_node(map_pointer new_node)
+    {
+        node = new_node;
+        first = *new_node;
+        last = first + difference_type(buffer_size());
+    }
+
+    reference operator*() const { return *current; }
+    pointer operator->() const { return &(operator*());}
+
+    difference_type operator-(const self& x) const
+    {
+        return difference_type((buffer_size()) * (node - x.node -1) +
+        (current - first) + (x.last - x.current));
+    }
+
+    self& operator++(){
+        ++current;
+        if(current == last){
+            set_node(node+1);
+            current = first;
+        }
+        return *this;
+    }
+
+    self operator++(int)
+    {
+        self tmp = *this;
+        ++*this;
+        return tmp;
+    }
+
+    self& operator--()
+    {
+        if(current == first){
+            set_node(node -1);
+            current = last;
+        }
+    }
+
+    self operator--(int)
+    {
+        self tmp = *this;
+        --*this;
+        return tmp;
+    }
+
+    /*TODO operator += + -= - []*/
+};
+
+template <class T, class Alloc = alloc,size_t BufSiz = 0>
+class deque
+{
 public:
     typedef T value_type;
     typedef value_type* pointer;
     typedef size_t size_type;
 
-    // Determine buffer size
-    static size_t buffer_size() {
-        return BufSiz != 0 ? BufSiz : (sizeof(T) < 512 ? size_t(512 / sizeof(T)) : size_t(1));
-    }
-
+public:
+    typedef __deque_iterator<T, T&,T*, BufSiz> iterator;
 protected:
     typedef pointer* map_pointer;
 
-    map_pointer map;          // Pointer to the array of pointers to buffers
-    size_type map_size;       // Size of the map
-    pointer first;            // Pointer to the first element
-    pointer last;             // Pointer to the last element + 1
+protected:
+    iterator start;
+    iterator finish;
+    map_pointer map;
+    size_type map_size;
 
 public:
-    deque() : map(nullptr), map_size(0), first(nullptr), last(nullptr) {
-        create_map_and_nodes(0);
-    }
-
-    ~deque() {
-        // Destructor - deallocate all the memory
-        for (map_pointer cur = map; cur < map + map_size; ++cur) {
-            delete[] *cur;
-        }
-        delete[] map;
-    }
-
-    bool empty() const { return first == last; }
-    size_type size() const { return size_type(last - first); }
-
-    // TODO: Other functions like push_back, push_front, pop_back, pop_front, etc.
-
-protected:
-    void create_map_and_nodes(size_type num_elements) {
-        // Create map and allocate memory for nodes (buffers)
-        size_type num_nodes = num_elements / buffer_size() + 1;
-        map_size = std::max((size_type)8, num_nodes + 2);  // Minimum map size is 8
-        map = new pointer[map_size];
-
-        // Initialize the map with null pointers
-        std::fill(map, map + map_size, nullptr);
-
-        map_pointer nstart = map + (map_size - num_nodes) / 2;
-        map_pointer nfinish = nstart + num_nodes - 1;
-
-        // Allocate buffers
-        for (map_pointer cur = nstart; cur <= nfinish; ++cur) {
-            *cur = allocate_node();
-        }
-
-        // Set first and last
-        first = *nstart;
-        last = first + num_elements % buffer_size();
-    }
-
-    pointer allocate_node() {
-        // Allocate memory for a single buffer
-        return new value_type[buffer_size()];
-    }
-
-    // TODO: Functions to handle insertion, deletion, reallocation, etc.
+    iterator begin(){return start;}
+    iterator end(){return finish;}
 };
