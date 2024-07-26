@@ -78,7 +78,6 @@ struct __deque_iterator
     /*TODO operator += + -= - []*/
 };
 
-
 template <class T, class Alloc = alloc,size_t BufSiz = 0>
 class deque
 {
@@ -127,7 +126,6 @@ public:
     void create_map_and_nodes(size_type num_elements)
     {
         if (__deque_iterator<T, T&, T*, BufSiz>::buffer_size() == 0){
-            cout<<"Buffer size cannot be zero.";
             return;
         }
 
@@ -138,6 +136,7 @@ public:
         map = new pointer[map_size]; // Assuming pointer is `value_type*`
         fill_n(map, map_size, nullptr); // Initialize map pointers to nullptr
     }
+
     //TODO review
     void destroy_map_and_nodes() {
         if (map != nullptr) {
@@ -146,7 +145,7 @@ public:
                 if (*current != nullptr) {
                     // Assuming the buffer is filled with objects that need to be destructed
                     value_type* buffer = *current;
-                    std::destroy(buffer, buffer + __deque_iterator<T, T&, T*, BufSiz>::buffer_size()); // Destroy objects
+                    destroy(buffer, buffer + __deque_iterator<T, T&, T*, BufSiz>::buffer_size()); // Destroy objects
                     delete[] buffer;  // Deallocate buffer
                 }
             }
@@ -164,7 +163,7 @@ public:
         try {
             for (size_type i = 0; i < n; ) {
                 *current = new value_type[__deque_iterator<T, T&, T*, BufSiz>::buffer_size()]; // Allocate buffer
-                size_type elements_to_init = std::min(n - i, __deque_iterator<T, T&, T*, BufSiz>::buffer_size());
+                size_type elements_to_init = min(n - i, __deque_iterator<T, T&, T*, BufSiz>::buffer_size());
                 uninitialized_fill_n(*current, elements_to_init, value);
                 ++current;
                 i += elements_to_init;
@@ -214,7 +213,7 @@ public:
     void push_back_aux(const value_type& t)
     {
         value_type t_copy = t;
-        reserve_map_at_back(); //Èç¹û·ûºÏÌõ¼þ£¬±ØÐëÖØ»»Ò»¸ömap
+        reserve_map_at_back(); //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ø»ï¿½Ò»ï¿½ï¿½map
         *(finish.node + 1) = allocate_node();
         try{
             construct(finish.current,t_copy);

@@ -1,14 +1,14 @@
 #include <new>
 #include <cstdlib>
-#include <type_traits>
+#include "../Algorithms/algobase.h"
+#include "../Iterators/iterator.h"
 
-//构造
 template <class T1, class T2>
 inline void construct(T1* p, T2 value)
 {
     new (p) T1(value);
 }
-//析构
+
 template <class T>
 inline void destroy(T* pointer)
 {
@@ -24,7 +24,7 @@ public:
         return 0 == n ? 0 : (T*) Alloc::allocate(n * sizeof(T));
     }
 
-    static T*allocate(void)
+    static T *allocate(void)
     {
         return (T*) Alloc::allocate(sizeof (T));
     }
@@ -40,8 +40,6 @@ public:
     }
 };
 
-
-//一级配置器
 template <int inst>
 class __malloc_alloc_template
 {
@@ -112,7 +110,7 @@ void * __malloc_alloc_template<inst>::oom_realloc(void *p,size_t n)
     }
 }
 
-//二级配置器
+
 /*TODO*/
 
 template <class ForwardIterator, class Size, class T>
@@ -121,16 +119,19 @@ inline ForwardIterator uninitialized_fill_n(ForwardIterator first, Size n, const
     return __uninitialized_fill_n(first,n,x,value_type(first));
 }
 
+//TODO: IsPODType
 template <class ForwardIterator, class Size, class T, class T1>
 inline ForwardIterator __uninitialized_fill_n(ForwardIterator first, Size n, const T&x, T1*)
 {
-    typedef typename std::is_pod<T1>::value is_POD;
-    return __uninitializede_fill_n_aux(first,n,x,is_POD);
+
+    typedef typename iterator_traits_self<ForwardIterator>::value_type ValueT;
+    typedef typename is_trivial<ValueT>::type IsPODType;
+    return __uninitializede_fill_n_aux(first,n,x,IsPODType());
 }
 
 template <class ForwardIterator, class Size, class T>
 inline ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const T& x, std::true_type) {
-    return std::fill_n(first, n, x); // PODs can be handled by simply copying
+    return fill_n(first, n, x); // PODs can be handled by simply copying
 }
 
 template <class ForwardIterator, class Size, class T>
@@ -138,6 +139,17 @@ ForwardIterator __uninitialized_fill_n_aux(ForwardIterator first, Size n, const 
 {
     ForwardIterator current = first;
     for(; n>0; --n, ++current)
-        construct(&*cur,x);
+        construct(&*current,x);
     return current;
 }
+
+struct rec {
+            char *a;
+            short b;
+            double c;
+            char d;
+            float e;
+            char f;
+            long g;
+            int h;
+        } ;
