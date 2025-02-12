@@ -213,7 +213,7 @@ public:
     void push_back_aux(const value_type& t)
     {
         value_type t_copy = t;
-        reserve_map_at_back(); //������������������ػ�һ��map
+        reserve_map_at_back(); 
         *(finish.node + 1) = allocate_node();
         try{
             construct(finish.current,t_copy);
